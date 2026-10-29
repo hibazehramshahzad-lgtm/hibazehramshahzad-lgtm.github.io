@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GitHub Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: sticky top bar with username search, profile header (avatar + bio + stats), language bar, filterable repo grid. */
+:root {
+  --bg: #0e1320;
+  --surface: #151c2e;
+  --surface-2: #1b2438;
+  --line: #27324a;
+  --fg: #e8ecf5;
+  --muted: #8f9bb5;
+  --accent: #46d7c0;
+  --accent-ink: #06231e;
+  --warn: #f2b84b;
+  --danger: #ff7b7b;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f3f5fa; --surface: #ffffff; --surface-2: #eaeef7; --line: #d6dcea;
+    --fg: #141a2b; --muted: #5b6784; --accent: #0b8f7c; --accent-ink: #ffffff;
+    --warn: #a86a00; --danger: #c93a3a; color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f3f5fa; --surface: #ffffff; --surface-2: #eaeef7; --line: #d6dcea;
+  --fg: #141a2b; --muted: #5b6784; --accent: #0b8f7c; --accent-ink: #ffffff;
+  --warn: #a86a00; --danger: #c93a3a; color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px)); }
+
+/* top bar */
+.bar { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.bar .wrap { display: flex; gap: 12px; align-items: center; padding-block: 12px; }
+.brand { font-family: var(--font-display); font-weight: 800; font-size: 18px; letter-spacing: -0.02em; white-space: nowrap; }
+.brand span { color: var(--accent); }
+.search { flex: 1; display: flex; gap: 8px; min-width: 0; }
+.search input { flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--line); color: var(--fg); border-radius: 8px; padding: 9px 12px; font: 500 14px var(--font-mono); }
+.search input::placeholder { color: var(--muted); }
+button { font: 600 14px var(--font-body); cursor: pointer; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); padding: 9px 14px; }
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.icon { padding: 9px 11px; line-height: 1; }
+
+/* profile */
+.profile { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: 32px; padding-block: 40px 28px; align-items: start; }
+.avatar { width: 168px; height: 168px; border-radius: 50%; border: 3px solid var(--line); background: var(--surface-2); object-fit: cover; display: block; }
+.profile h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(32px, 6vw, 52px); line-height: 1.02; letter-spacing: -0.03em; margin: 0; text-wrap: balance; }
+.handle { font-family: var(--font-mono); color: var(--accent); font-size: 15px; margin-top: 6px; display: inline-block; text-decoration: none; }
+.handle:hover { text-decoration: underline; }
+.bio { margin: 14px 0 0; max-width: 62ch; font-size: 16px; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 14px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 14px; }
+.meta a { text-decoration: none; border-bottom: 1px dotted var(--muted); }
+.meta a:hover { color: var(--accent); border-color: var(--accent); }
+.stats { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 22px; }
+.stat b { display: block; font-family: var(--font-display); font-size: 26px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat span { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+.cta { margin-top: 22px; display: inline-flex; text-decoration: none; }
+
+/* sections */
+section { padding-block: 22px; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+h2 { font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+.sub { color: var(--muted); font-size: 13px; font-family: var(--font-mono); }
+
+/* languages */
+.langbar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--surface-2); gap: 2px; }
+.langbar i { display: block; min-width: 4px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 14px 0 0; padding: 0; list-style: none; font-size: 13px; }
+.legend li { display: flex; align-items: center; gap: 7px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.legend em { font-style: normal; color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
+
+/* toolbar */
+.tools { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.tools input[type="search"], .tools select { background: var(--surface); border: 1px solid var(--line); color: var(--fg); border-radius: 8px; padding: 9px 12px; font: 400 14px var(--font-body); min-width: 0; }
+.tools input[type="search"] { flex: 1 1 200px; }
+.check { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; }
+.check input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+/* repo grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+.repo { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; text-decoration: none; transition: border-color .15s, transform .15s; }
+.repo:hover { border-color: var(--accent); transform: translateY(-2px); }
+.repo h3 { margin: 0; font-family: var(--font-mono); font-weight: 500; font-size: 15px; color: var(--accent); overflow-wrap: anywhere; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tag { font: 500 11px var(--font-body); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; }
+.repo p { margin: 0; color: var(--muted); font-size: 14px; flex: 1; overflow-wrap: anywhere; }
+.topics { display: flex; flex-wrap: wrap; gap: 6px; }
+.topics span { background: var(--surface-2); border-radius: 999px; padding: 2px 9px; font-size: 12px; color: var(--fg); }
+.foot { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); align-items: center; font-variant-numeric: tabular-nums; }
+.foot .lang { display: inline-flex; align-items: center; gap: 6px; color: var(--fg); }
+
+/* states */
+.note { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 14px 16px; margin-top: 20px; font-size: 14px; }
+.note.warn { border-color: var(--warn); }
+.note.err { border-color: var(--danger); }
+.note b { color: var(--fg); }
+.empty { color: var(--muted); padding: 40px 0; text-align: center; grid-column: 1 / -1; }
+.skeleton { height: 150px; border-radius: 10px; background: linear-gradient(100deg, var(--surface) 30%, var(--surface-2) 50%, var(--surface) 70%); background-size: 200% 100%; animation: sh 1.2s linear infinite; }
+@keyframes sh { to { background-position: -200% 0; } }
+footer { padding-block: 36px 48px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); margin-top: 24px; }
+
+@media (max-width: 640px) {
+  .profile { grid-template-columns: 1fr; gap: 20px; padding-top: 28px; }
+  .avatar { width: 112px; height: 112px; }
+  .brand { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+  .repo { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="brand">git<span>folio</span></div>
+    <form class="search" id="searchForm" autocomplete="off">
+      <input id="userInput" type="text" placeholder="GitHub username" aria-label="GitHub username" spellcheck="false">
+      <button class="primary" type="submit">Load</button>
+    </form>
+    <button class="icon" id="themeBtn" type="button" aria-label="Switch light or dark theme" title="Switch theme">◐</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="status"></div>
+
+  <div class="profile" id="profile" hidden>
+    <img class="avatar" id="avatar" alt="">
+    <div>
+      <h1 id="name"></h1>
+      <a class="handle" id="handle" target="_blank" rel="noopener"></a>
+      <p class="bio" id="bio"></p>
+      <ul class="meta" id="meta"></ul>
+      <div class="stats" id="stats"></div>
+      <a class="cta" id="cta" target="_blank" rel="noopener"><button class="primary" type="button">Open on GitHub</button></a>
+    </div>
+  </div>
+
+  <section id="langSec" hidden>
+    <div class="sec-head"><h2>Languages</h2><span class="sub" id="langSub"></span></div>
+    <div class="langbar" id="langbar" role="img" aria-label="Language share across repositories"></div>
+    <ul class="legend" id="legend"></ul>
+  </section>
+
+  <section id="repoSec" hidden>
+    <div class="sec-head"><h2>Repositories</h2><span class="sub" id="repoSub"></span></div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Search repositories" aria-label="Search repositories">
+      <select id="lang" aria-label="Filter by language"><option value="">All languages</option></select>
+      <select id="sort" aria-label="Sort repositories">
+        <option value="updated">Recently updated</option>
+        <option value="stars">Most stars</option>
+        <option value="name">Name A to Z</option>
+      </select>
+      <label class="check"><input type="checkbox" id="forks"> Include forks</label>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">Data comes live from the public GitHub API. Change <code>DEFAULT_USERNAME</code> at the top of the script to set your own username, or open this page with <code>?user=yourname</code> in the address.</div>
+</footer>
+
+<script>
+// ====== Set your GitHub username here ======
+const DEFAULT_USERNAME = "hibazehra";
+// ===========================================
+
+const LANG_COLORS = {
+  JavaScript: "#f1e05a", TypeScript: "#3178c6", Python: "#4b8bbe", HTML: "#e34c26", CSS: "#a56ee0",
+  Java: "#e8863a", "C++": "#f34b7d", C: "#8a8f98", "C#": "#2fa24a", PHP: "#8892bf", Ruby: "#cc342d",
+  Go: "#00add8", Rust: "#dea584", Kotlin: "#a97bff", Swift: "#f05138", Dart: "#00b4ab",
+  Shell: "#89e051", Jupyter: "#da5b0b", "Jupyter Notebook": "#da5b0b", Vue: "#41b883", SCSS: "#c6538c"
+};
+const FALLBACK_COLORS = ["#46d7c0", "#f2b84b", "#7c9cff", "#ff8fab", "#a3e635", "#c084fc"];
+
+const DEMO = {
+  user: { login: "your-username", name: "Your Name", bio: "Sample profile shown while the GitHub API is unreachable. Enter a real username above.", location: "Karachi, Pakistan", company: null, blog: "", twitter_username: null, followers: 24, following: 31, public_repos: 6, html_url: "https://github.com", avatar_url: "" },
+  repos: [
+    { name: "portfolio-site", description: "Personal website built with HTML, CSS and JavaScript.", language: "JavaScript", stargazers_count: 12, forks_count: 3, fork: false, updated_at: "2026-10-20T10:00:00Z", html_url: "https://github.com", topics: ["portfolio", "frontend"] },
+    { name: "weather-app", description: "Search any city and see the forecast.", language: "TypeScript", stargazers_count: 8, forks_count: 1, fork: false, updated_at: "2026-09-14T10:00:00Z", html_url: "https://github.com", topics: ["api"] },
+    { name: "todo-list", description: "Simple to-do list with local storage.", language: "HTML", stargazers_count: 4, forks_count: 0, fork: false, updated_at: "2026-07-02T10:00:00Z", html_url: "https://github.com", topics: [] },
+    { name: "data-analysis", description: "Pandas notebooks for a class project.", language: "Python", stargazers_count: 2, forks_count: 0, fork: false, updated_at: "2026-05-18T10:00:00Z", html_url: "https://github.com", topics: ["pandas"] }
+  ]
+};
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = (n) => Number(n).toLocaleString("en");
+const colorFor = (lang, i = 0) => LANG_COLORS[lang] || FALLBACK_COLORS[i % FALLBACK_COLORS.length];
+const ago = (iso) => {
+  const d = (Date.now() - new Date(iso).getTime()) / 864e5;
+  if (d < 1) return "today";
+  if (d < 30) return Math.floor(d) + "d ago";
+  if (d < 365) return Math.floor(d / 30) + "mo ago";
+  return Math.floor(d / 365) + "y ago";
+};
+const safeGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const safeSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+
+let state = { user: null, repos: [] };
+
+/* theme */
+(function initTheme() {
+  const saved = safeGet("theme");
+  if (saved === "light" || saved === "dark") document.documentElement.setAttribute("data-theme", saved);
+  $("themeBtn").addEventListener("click", () => {
+    const cur = document.documentElement.getAttribute("data-theme") ||
+      (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+    const next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    safeSet("theme", next);
+  });
+})();
+
+function setStatus(html, kind) {
+  $("status").innerHTML = html ? `<div class="note ${kind || ""}">${html}</div>` : "";
+}
+
+function showSkeleton() {
+  $("profile").hidden = true; $("langSec").hidden = true; $("repoSec").hidden = false;
+  $("grid").innerHTML = '<div class="skeleton"></div>'.repeat(6);
+  $("repoSub").textContent = "loading";
+}
+
+async function getJSON(url) {
+  const res = await fetch(url, { headers: { Accept: "application/vnd.github+json" } });
+  if (res.status === 404) throw { code: 404 };
+  if (res.status === 403 || res.status === 429) throw { code: 403 };
+  if (!res.ok) throw { code: res.status };
+  return res.json();
+}
+
+async function load(username, useDemo) {
+  username = (username || "").trim().replace(/^@/, "");
+  if (!username && !useDemo) {
+    render(DEMO.user, DEMO.repos);
+    setStatus("<b>Demo profile.</b> Type your GitHub username in the box above and press Load to see your own repositories.", "warn");
+    return;
+  }
+  setStatus("");
+  showSkeleton();
+  try {
+    const user = await getJSON(`https://api.github.com/users/${encodeURIComponent(username)}`);
+    let repos = [];
+    const pages = Math.min(3, Math.ceil(user.public_repos / 100) || 1);
+    for (let p = 1; p <= pages; p++) {
+      const part = await getJSON(`https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=100&page=${p}&sort=updated`);
+      repos = repos.concat(part);
+    }
+    safeSet("username", user.login);
+    $("userInput").value = user.login;
+    render(user, repos);
+  } catch (e) {
+    $("repoSec").hidden = true;
+    if (e && e.code === 404) setStatus(`<b>User not found.</b> There is no GitHub account named "${esc(username)}". Check the spelling and try again.`, "err");
+    else if (e && e.code === 403) setStatus("<b>GitHub rate limit reached.</b> The public API allows about 60 requests per hour per network. Wait a while and press Load again.", "err");
+    else {
+      render(DEMO.user, DEMO.repos);
+      setStatus("<b>Could not reach GitHub.</b> Check your internet connection. A demo profile is shown instead.", "warn");
+    }
+  }
+}
+
+function render(user, repos) {
+  state = { user, repos };
+  const name = user.name || user.login;
+  $("profile").hidden = false;
+  document.title = name + " | GitHub Profile";
+  const av = $("avatar");
+  if (user.avatar_url) { av.src = user.avatar_url; av.hidden = false; } else { av.removeAttribute("src"); av.hidden = true; }
+  av.alt = "Photo of " + name;
+  $("name").textContent = name;
+  $("handle").textContent = "@" + user.login;
+  $("handle").href = user.html_url;
+  $("cta").href = user.html_url;
+  $("bio").textContent = user.bio || "";
+  $("bio").hidden = !user.bio;
+
+  const meta = [];
+  if (user.company) meta.push(`<li>${esc(user.company)}</li>`);
+  if (user.location) meta.push(`<li>${esc(user.location)}</li>`);
+  if (user.blog) {
+    const url = /^https?:\/\//i.test(user.blog) ? user.blog : "https://" + user.blog;
+    meta.push(`<li><a href="${esc(url)}" target="_blank" rel="noopener">${esc(user.blog)}</a></li>`);
+  }
+  if (user.twitter_username) meta.push(`<li><a href="https://twitter.com/${esc(user.twitter_username)}" target="_blank" rel="noopener">@${esc(user.twitter_username)}</a></li>`);
+  $("meta").innerHTML = meta.join("");
+
+  const stars = repos.reduce((a, r) => a + (r.stargazers_count || 0), 0);
+  $("stats").innerHTML = [
+    ["Repositories", user.public_repos],
+    ["Stars earned", stars],
+    ["Followers", user.followers],
+    ["Following", user.following]
+  ].map(([l, v]) => `<div class="stat"><b>${fmt(v)}</b><span>${l}</span></div>`).join("");
+
+  renderLangs(repos);
+  fillLangFilter(repos);
+  $("repoSec").hidden = false;
+  renderRepos();
+}
+
+function renderLangs(repos) {
+  const own = repos.filter((r) => !r.fork && r.language);
+  const count = {};
+  own.forEach((r) => { count[r.language] = (count[r.language] || 0) + 1; });
+  const rows = Object.entries(count).sort((a, b) => b[1] - a[1]);
+  if (!rows.length) { $("langSec").hidden = true; return; }
+  const total = own.length;
+  $("langSec").hidden = false;
+  $("langSub").textContent = `by repository count, ${total} original repos`;
+  $("langbar").innerHTML = rows.map(([l, n], i) => `<i style="flex:${n};background:${colorFor(l, i)}" title="${esc(l)}: ${n}"></i>`).join("");
+  $("legend").innerHTML = rows.map(([l, n], i) =>
+    `<li><span class="dot" style="background:${colorFor(l, i)}"></span>${esc(l)} <em>${Math.round((n / total) * 100)}%</em></li>`).join("");
+}
+
+function fillLangFilter(repos) {
+  const langs = [...new Set(repos.map((r) => r.language).filter(Boolean))].sort();
+  $("lang").innerHTML = '<option value="">All languages</option>' + langs.map((l) => `<option value="${esc(l)}">${esc(l)}</option>`).join("");
+}
+
+function renderRepos() {
+  const q = $("q").value.trim().toLowerCase();
+  const lang = $("lang").value;
+  const sort = $("sort").value;
+  const forks = $("forks").checked;
+  let list = state.repos.filter((r) =>
+    (forks || !r.fork) &&
+    (!lang || r.language === lang) &&
+    (!q || (r.name + " " + (r.description || "") + " " + (r.topics || []).join(" ")).toLowerCase().includes(q)));
+  list.sort((a, b) =>
+    sort === "stars" ? b.stargazers_count - a.stargazers_count :
+    sort === "name" ? a.name.localeCompare(b.name) :
+    new Date(b.updated_at) - new Date(a.updated_at));
+  $("repoSub").textContent = `${list.length} of ${state.repos.length} shown`;
+  if (!list.length) { $("grid").innerHTML = '<div class="empty">No repositories match these filters.</div>'; return; }
+  $("grid").innerHTML = list.map((r) => `
+    <a class="repo" href="${esc(r.html_url)}" target="_blank" rel="noopener">
+      <h3>${esc(r.name)}${r.fork ? '<span class="tag">fork</span>' : ""}</h3>
+      <p>${esc(r.description || "No description yet.")}</p>
+      ${(r.topics || []).length ? `<div class="topics">${r.topics.slice(0, 4).map((t) => `<span>${esc(t)}</span>`).join("")}</div>` : ""}
+      <div class="foot">
+        ${r.language ? `<span class="lang"><span class="dot" style="background:${colorFor(r.language)}"></span>${esc(r.language)}</span>` : ""}
+        <span title="Stars">★ ${fmt(r.stargazers_count)}</span>
+        <span title="Forks">⑂ ${fmt(r.forks_count)}</span>
+        <span>Updated ${ago(r.updated_at)}</span>
+      </div>
+    </a>`).join("");
+}
+
+["q", "lang", "sort", "forks"].forEach((id) => $(id).addEventListener(id === "q" ? "input" : "change", renderRepos));
+
+$("searchForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const v = $("userInput").value.trim();
+  if (v) load(v);
+});
+
+(function start() {
+  let initial = "";
+  try { initial = new URLSearchParams(location.search).get("user") || ""; } catch (e) {}
+  initial = initial || DEFAULT_USERNAME || safeGet("username") || "";
+  $("userInput").value = initial;
+  load(initial);
+})();
+</script>
+</body>
+</html>
